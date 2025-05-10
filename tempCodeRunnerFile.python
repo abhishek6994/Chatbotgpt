@@ -1,0 +1,94 @@
+class Node:
+    def _init_(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+class BST:
+    def _init_(self):
+        self.root = None
+
+    def insert(self, value):
+        if not self.root:
+            self.root = Node(value)
+            return
+
+        def _insert_recursive(node, value):
+            if value < node.value:
+                if node.left:
+                    _insert_recursive(node.left, value)
+                else:
+                    node.left = Node(value)
+            elif value > node.value:
+                if node.right:
+                    _insert_recursive(node.right, value)
+                else:
+                    node.right = Node(value)
+            # If value == node.value, do nothing (ignore duplicate)
+
+        _insert_recursive(self.root, value)
+
+    def search(self, value):
+        def _search_recursive(node, value):
+            if not node:
+                return False
+            if value == node.value:
+                return True
+            elif value < node.value:
+                return _search_recursive(node.left, value)
+            else:
+                return _search_recursive(node.right, value)
+
+        return _search_recursive(self.root, value)
+
+    def delete(self, value):
+        def _find_min(node):
+            while node.left:
+                node = node.left
+            return node
+
+        def _delete_recursive(node, value):
+            if not node:
+                return None
+            if value < node.value:
+                node.left = _delete_recursive(node.left, value)
+            elif value > node.value:
+                node.right = _delete_recursive(node.right, value)
+            else:  # value == node.value (node to be deleted)
+                if not node.left:
+                    return node.right
+                elif not node.right:
+                    return node.left
+                else:
+                    min_right = _find_min(node.right)
+                    node.value = min_right.value
+                    node.right = _delete_recursive(node.right, min_right.value)
+            return node
+
+        self.root = _delete_recursive(self.root, value)
+
+def solve(Q, queries):
+    bst = BST()
+    results = []
+    for query in queries:
+        x, y = query
+        if x == 0:
+            bst.insert(y)
+        elif x == 1:
+            if bst.search(y):
+                results.append(1)
+                bst.delete(y)
+            else:
+                results.append(0)
+    return results
+
+# Input Reading and Output Formatting as specified
+Q = int(input())
+queries = []
+for _ in range(Q):
+    x, y = map(int, input().split())
+    queries.append([x, y])
+
+results = solve(Q, queries)
+for result in results:
+    print(result)
